@@ -1,7 +1,6 @@
 package form
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -24,7 +23,7 @@ func NewDecoder() *Decoder {
 func (d *Decoder) Decode(dst interface{}, src url.Values) error {
 	v := reflect.ValueOf(dst)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		return errors.New("the interface must be a pointer to struct")
+		return TypeError
 	}
 
 	fields := map[string]bool{}
@@ -44,8 +43,8 @@ func (d *Decoder) Decode(dst interface{}, src url.Values) error {
 		}
 
 		var (
-			key = reflect.New(t.Key())
-			val = reflect.New(t.Elem())
+			key = reflect.New(t.Key()).Elem()
+			val = reflect.New(t.Elem()).Elem()
 		)
 		err := d.decodeElement(t.Key(), key, k)
 		if err != nil {
@@ -58,7 +57,6 @@ func (d *Decoder) Decode(dst interface{}, src url.Values) error {
 		m.SetMapIndex(key, val)
 	}
 
-	fmt.Println("m", m)
 	mapField.Set(m)
 	return nil
 }
@@ -93,15 +91,19 @@ func (d *Decoder) decode(v reflect.Value, src url.Values, fields map[string]bool
 		fields[name] = true
 		fv := v.Field(i)
 
-		if fv.Addr().Type().Implements(unmarshalerType) {
+		if fv.CanAddr() && fv.Addr().Type().Implements(unmarshalerType) {
 			if err = fv.Addr().Interface().(Unmarshaler).UnmarshalURL(src.Get(name)); err != nil {
-				return mapField, err
+				goto End
 			}
 			continue
 		}
 
 		switch fv.Type().Kind() {
 		case reflect.Ptr:
+			if src.Get(name) == NullValue {
+				fv.Set(reflect.Zero(fv.Type()))
+				continue
+			}
 			fv.Set(reflect.New(fv.Type().Elem()))
 			if fv.Type().Implements(unmarshalerType) {
 				err = fv.Interface().(Unmarshaler).UnmarshalURL(src.Get(name))
@@ -121,7 +123,9 @@ func (d *Decoder) decode(v reflect.Value, src url.Values, fields map[string]bool
 		case reflect.Map:
 			mapField = fv
 		default:
-			err = d.unmarshal(fv.Type(), fv, src.Get(name))
+			if err = d.unmarshal(fv.Type(), fv, src.Get(name)); err != nil {
+				goto End
+			}
 		}
 	}
 
@@ -166,15 +170,11 @@ func (d *Decoder) unmarshal(t reflect.Type, v reflect.Value, src string) (err er
 		v.SetFloat(val.Elem().Float())
 	case reflect.String:
 		val := reflect.New(StringType)
-		if err = val.Interface().(Unmarshaler).UnmarshalURL(src); err != nil {
-			return
-		}
+		_ = val.Interface().(Unmarshaler).UnmarshalURL(src) // Never return errors
 		v.SetString(val.Elem().String())
 	case reflect.Interface:
 		val := reflect.New(InterfaceType)
-		if err = val.Interface().(Unmarshaler).UnmarshalURL(src); err != nil {
-			return
-		}
+		_ = val.Interface().(Unmarshaler).UnmarshalURL(src) // Never return errors
 		v.Set(val.Elem().Field(0))
 	//case reflect.Ptr:
 	//case reflect.Slice, reflect.Array:

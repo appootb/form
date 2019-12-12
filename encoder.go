@@ -1,7 +1,6 @@
 package form
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -23,26 +22,19 @@ func NewEncoder() *Encoder {
 
 func (e *Encoder) Encode(src interface{}, dst url.Values) error {
 	v := reflect.ValueOf(src)
-	err := e.encode(v, dst)
-	return err
-}
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		return TypeError
+	}
 
-// isValidStructPointer test if input value is a valid struct pointer.
-func (e *Encoder) isValidStructPointer(v reflect.Value) bool {
-	return v.Type().Kind() == reflect.Ptr && v.Elem().IsValid() && v.Elem().Type().Kind() == reflect.Struct
+	err := e.encode(v.Elem(), dst)
+	return err
 }
 
 func (e *Encoder) isZero(v reflect.Value) bool {
 	switch v.Kind() {
 	case reflect.Func:
-	case reflect.Map, reflect.Slice:
+	case reflect.Map, reflect.Slice, reflect.Array:
 		return v.IsNil() || v.Len() == 0
-	case reflect.Array:
-		z := true
-		for i := 0; i < v.Len(); i++ {
-			z = z && e.isZero(v.Index(i))
-		}
-		return z
 	case reflect.Struct:
 		z := true
 		for i := 0; i < v.NumField(); i++ {
@@ -56,12 +48,10 @@ func (e *Encoder) isZero(v reflect.Value) bool {
 }
 
 func (e *Encoder) encode(v reflect.Value, dst url.Values) error {
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return errors.New("the interface must be a struct")
-	}
+	var (
+		marshaler Marshaler
+	)
+
 	t := v.Type()
 
 	for i := 0; i < v.NumField(); i++ {
@@ -71,41 +61,36 @@ func (e *Encoder) encode(v reflect.Value, dst url.Values) error {
 		}
 
 		fv := v.Field(i)
-
-		// Encode struct pointer types if the field is a valid pointer and a struct.
-		if e.isValidStructPointer(fv) {
-			_ = e.encode(fv.Elem(), dst)
+		if opts.Contains("omitempty") && e.isZero(fv) {
 			continue
 		}
 
-		marshaler := e.getMarshaler(fv.Type(), fv)
-
-		// Encode non-slice types and custom implementations immediately.
+		// Encode base types and custom implementations immediately.
+		marshaler = e.getMarshaler(fv.Type(), fv)
 		if marshaler != nil {
-			if opts.Contains("omitempty") && e.isZero(fv) {
-				continue
-			}
-
 			value, err := marshaler.MarshalURL()
 			if err != nil {
 				return err
 			}
-
 			dst[name] = append(dst[name], value)
 			continue
 		}
 
 		switch fv.Type().Kind() {
+		case reflect.Ptr:
+			if !fv.IsValid() || fv.IsNil() {
+				dst[name] = []string{NullValue}
+				continue
+			}
+			if err := e.encode(fv.Elem(), dst); err != nil {
+				return err
+			}
 		case reflect.Struct:
 			err := e.encode(fv, dst)
 			if err != nil {
 				return err
 			}
 		case reflect.Slice, reflect.Array:
-			if fv.Len() == 0 && opts.Contains("omitempty") {
-				continue
-			}
-
 			dst[name] = []string{}
 			for j := 0; j < fv.Len(); j++ {
 				value, err := e.getMarshaler(fv.Type().Elem(), fv.Index(j)).MarshalURL()
@@ -115,10 +100,6 @@ func (e *Encoder) encode(v reflect.Value, dst url.Values) error {
 				dst[name] = append(dst[name], value)
 			}
 		case reflect.Map:
-			if fv.Len() == 0 && opts.Contains("omitempty") {
-				continue
-			}
-
 			for _, k := range fv.MapKeys() {
 				key, err := e.getMarshaler(k.Type(), k).MarshalURL()
 				if err != nil {
@@ -139,16 +120,15 @@ func (e *Encoder) encode(v reflect.Value, dst url.Values) error {
 }
 
 func (e *Encoder) getMarshaler(t reflect.Type, v reflect.Value) Marshaler {
-	if t.Implements(marshalerType) {
-		return v.Interface().(Marshaler)
+	if v.CanAddr() && v.Addr().Type().Implements(marshalerType) {
+		return v.Addr().Interface().(Marshaler)
+	} else if v.Type().Implements(marshalerType) {
+		if v.Type().Kind() != reflect.Ptr || v.IsValid() && !v.IsNil() {
+			return v.Interface().(Marshaler)
+		}
 	}
 
 	switch t.Kind() {
-	case reflect.Ptr:
-		if v.IsNil() {
-			return &Null{}
-		}
-		return e.getMarshaler(t.Elem(), v.Elem())
 	case reflect.Bool:
 		val := reflect.New(BoolType).Elem()
 		val.SetBool(v.Bool())

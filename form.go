@@ -1,6 +1,13 @@
 package form
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
+
+var (
+	TypeError = errors.New("the interface must be a struct")
+)
 
 func Encode(src interface{}) (url.Values, error) {
 	v := url.Values{}

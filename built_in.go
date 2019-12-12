@@ -6,12 +6,16 @@ import (
 	"strconv"
 )
 
+const (
+	NullValue = "null"
+)
+
 var (
 	BoolType      = reflect.TypeOf(Bool(false))
 	Int64Type     = reflect.TypeOf(Int64(0))
 	UInt64Type    = reflect.TypeOf(UInt64(0))
 	Float32Type   = reflect.TypeOf(Float32(0.0))
-	Float64Type   = reflect.TypeOf(Float32(0.0))
+	Float64Type   = reflect.TypeOf(Float64(0.0))
 	StringType    = reflect.TypeOf(String(""))
 	InterfaceType = reflect.TypeOf(Interface{})
 )
@@ -23,6 +27,9 @@ func (v Bool) MarshalURL() (string, error) {
 }
 
 func (v *Bool) UnmarshalURL(src string) error {
+	if src == "" {
+		return nil
+	}
 	val, err := strconv.ParseBool(src)
 	if err != nil {
 		return err
@@ -38,7 +45,13 @@ func (v Int64) MarshalURL() (string, error) {
 }
 
 func (v *Int64) UnmarshalURL(src string) error {
-	val, _ := strconv.ParseInt(src, 10, 0)
+	if src == "" {
+		return nil
+	}
+	val, err := strconv.ParseInt(src, 10, 0)
+	if err != nil {
+		return err
+	}
 	*v = Int64(val)
 	return nil
 }
@@ -50,7 +63,13 @@ func (v UInt64) MarshalURL() (string, error) {
 }
 
 func (v *UInt64) UnmarshalURL(src string) error {
-	val, _ := strconv.ParseUint(src, 10, 0)
+	if src == "" {
+		return nil
+	}
+	val, err := strconv.ParseUint(src, 10, 0)
+	if err != nil {
+		return err
+	}
 	*v = UInt64(val)
 	return nil
 }
@@ -58,11 +77,17 @@ func (v *UInt64) UnmarshalURL(src string) error {
 type Float32 float32
 
 func (v Float32) MarshalURL() (string, error) {
-	return strconv.FormatFloat(float64(v), 'f', 6, 32), nil
+	return strconv.FormatFloat(float64(v), 'f', 16, 32), nil
 }
 
 func (v *Float32) UnmarshalURL(src string) error {
-	val, _ := strconv.ParseFloat(src, 32)
+	if src == "" {
+		return nil
+	}
+	val, err := strconv.ParseFloat(src, 32)
+	if err != nil {
+		return err
+	}
 	*v = Float32(val)
 	return nil
 }
@@ -70,11 +95,17 @@ func (v *Float32) UnmarshalURL(src string) error {
 type Float64 float64
 
 func (v Float64) MarshalURL() (string, error) {
-	return strconv.FormatFloat(float64(v), 'f', 6, 64), nil
+	return strconv.FormatFloat(float64(v), 'f', 32, 64), nil
 }
 
 func (v *Float64) UnmarshalURL(src string) error {
-	val, _ := strconv.ParseFloat(src, 64)
+	if src == "" {
+		return nil
+	}
+	val, err := strconv.ParseFloat(src, 64)
+	if err != nil {
+		return err
+	}
 	*v = Float64(val)
 	return nil
 }
@@ -101,10 +132,4 @@ func (v Interface) MarshalURL() (string, error) {
 func (v *Interface) UnmarshalURL(src string) error {
 	v.Val = src
 	return nil
-}
-
-type Null struct{}
-
-func (v Null) MarshalURL() (string, error) {
-	return "null", nil
 }
