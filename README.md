@@ -50,11 +50,13 @@ func MyHttpRequest() {
 
 To define custom names for fields, use a struct tag "form". To not populate certain fields, use a dash for the name and it will be ignored:
 
+```go
 type Person struct {
     Name  string `form:"name"`  // custom name
     Phone string `form:"phone"` // custom name
     Admin bool   `form:"-"`     // this field is never set
 }
+```
 
 The supported field types in the struct are:
 
