@@ -34,8 +34,8 @@ func TestBaseType(t *testing.T) {
 		},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,9 +43,9 @@ func TestBaseType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,8 +69,8 @@ func TestFloatType(t *testing.T) {
 		FV64: math.Pi,
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,9 +78,9 @@ func TestFloatType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,8 +103,8 @@ func TestInterfaceType(t *testing.T) {
 		SV: []interface{}{1, "b"}, // interface{} type will be decoded as string
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,9 +112,9 @@ func TestInterfaceType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,8 +138,8 @@ func TestEmptyEmbedType(t *testing.T) {
 	exp := url.Values{}
 	v1 := TestType{}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,9 +147,9 @@ func TestEmptyEmbedType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,8 +171,8 @@ func TestOmitEmptyEmbedType(t *testing.T) {
 		EmbedType: EmbedType{V: false},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,9 +180,9 @@ func TestOmitEmptyEmbedType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,8 +203,8 @@ func TestNullPtrType(t *testing.T) {
 	}
 	v1 := TestType{}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,9 +212,9 @@ func TestNullPtrType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,8 +238,8 @@ func TestPtrType(t *testing.T) {
 		Embed: &EmbedType{IV: 10},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,9 +247,9 @@ func TestPtrType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -327,8 +327,8 @@ func TestCustomMarshalerType(t *testing.T) {
 		"BTime": []string{v1.BTime.String()},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -336,9 +336,9 @@ func TestCustomMarshalerType(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -364,8 +364,8 @@ func TestCustomMarshalerType2(t *testing.T) {
 		"BVal": []string{"N"},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -373,9 +373,9 @@ func TestCustomMarshalerType2(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -396,8 +396,8 @@ func TestCustomMarshalerType3(t *testing.T) {
 		"SV": []string{"Y", "N"},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -405,9 +405,9 @@ func TestCustomMarshalerType3(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -423,13 +423,13 @@ func TestCustomMarshalerType4(t *testing.T) {
 
 	v := TestType{}
 
-	// Encode
-	if _, err := Encode(&v); err == nil {
+	// Marshal
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 
-	// Decode
-	if err := Decode(&v, url.Values{}); err == nil {
+	// Unmarshal
+	if err := Unmarshal(&v, url.Values{}); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -443,13 +443,13 @@ func TestCustomMarshalerType5(t *testing.T) {
 		EV: []*CustomErrType{{1}},
 	}
 
-	// Encode
-	if _, err := Encode(&v); err == nil {
+	// Marshal
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 
-	// Decode
-	if err := Decode(&v, url.Values{"EV": []string{"1"}}); err == nil {
+	// Unmarshal
+	if err := Unmarshal(&v, url.Values{"EV": []string{"1"}}); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -464,7 +464,7 @@ func TestCustomMarshalerType6(t *testing.T) {
 			"a": {1},
 		},
 	}
-	if _, err := Encode(&v); err == nil {
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -479,7 +479,7 @@ func TestCustomMarshalerType7(t *testing.T) {
 			{1}: 1,
 		},
 	}
-	if _, err := Encode(&v); err == nil {
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -497,7 +497,7 @@ func TestCustomMarshalerType8(t *testing.T) {
 			EV: &CustomErrType{1},
 		},
 	}
-	if _, err := Encode(&v); err == nil {
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -515,7 +515,7 @@ func TestCustomMarshalerType9(t *testing.T) {
 			EV: &CustomErrType{1},
 		},
 	}
-	if _, err := Encode(&v); err == nil {
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -528,8 +528,8 @@ func TestEmptySlice(t *testing.T) {
 	exp := url.Values{}
 	v1 := TestType{}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -537,9 +537,9 @@ func TestEmptySlice(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -550,13 +550,13 @@ func TestEmptySlice(t *testing.T) {
 
 func TestInvalidInputType(t *testing.T) {
 	src := url.Values{}
-	_, err := Encode(&src)
+	_, err := Marshal(&src)
 	if err != TypeError {
 		t.Fatal("expected err:", TypeError, "returns:", err)
 	}
 
 	dst := map[string]string{}
-	err = Decode(&dst, src)
+	err = Unmarshal(&dst, src)
 	if err != TypeError {
 		t.Fatal("expected err:", TypeError, "returns:", err)
 	}
@@ -581,55 +581,55 @@ func TestInvalidDecode(t *testing.T) {
 	v := TestType{}
 	// Bool
 	src["BV"] = []string{""}
-	if err := Decode(&v, src); err != nil {
+	if err := Unmarshal(&v, src); err != nil {
 		t.Fatal("excepted no error for bool", err)
 	}
 	src["BV"] = []string{"a"}
-	if err := Decode(&v, src); err == nil {
+	if err := Unmarshal(&v, src); err == nil {
 		t.Fatal("excepted error for bool", v)
 	}
 	src["BV"] = []string{"true"}
 
 	// Int
 	src["IV"] = []string{""}
-	if err := Decode(&v, src); err != nil {
+	if err := Unmarshal(&v, src); err != nil {
 		t.Fatal("excepted no error for int", err)
 	}
 	src["IV"] = []string{"a"}
-	if err := Decode(&v, src); err == nil {
+	if err := Unmarshal(&v, src); err == nil {
 		t.Fatal("excepted error for int", v)
 	}
 	src["IV"] = []string{"-1"}
 
 	// UInt
 	src["UV"] = []string{}
-	if err := Decode(&v, src); err != nil {
+	if err := Unmarshal(&v, src); err != nil {
 		t.Fatal("excepted no error for uint", err)
 	}
 	src["UV"] = []string{"a"}
-	if err := Decode(&v, src); err == nil {
+	if err := Unmarshal(&v, src); err == nil {
 		t.Fatal("excepted error for uint", v)
 	}
 	src["UV"] = []string{"1"}
 
 	// F32
 	src["F32"] = []string{}
-	if err := Decode(&v, src); err != nil {
+	if err := Unmarshal(&v, src); err != nil {
 		t.Fatal("excepted no error for float32", err)
 	}
 	src["F32"] = []string{"a"}
-	if err := Decode(&v, src); err == nil {
+	if err := Unmarshal(&v, src); err == nil {
 		t.Fatal("excepted error for float32", v)
 	}
 	src["F32"] = []string{"3.14"}
 
 	// F64
 	src["F64"] = []string{}
-	if err := Decode(&v, src); err != nil {
+	if err := Unmarshal(&v, src); err != nil {
 		t.Fatal("excepted no error for float64", err)
 	}
 	src["F64"] = []string{"a"}
-	if err := Decode(&v, src); err == nil {
+	if err := Unmarshal(&v, src); err == nil {
 		t.Fatal("excepted error for float64", v)
 	}
 	src["F64"] = []string{"3.14"}
@@ -644,13 +644,13 @@ func TestComplex(t *testing.T) {
 		CV: complex(10, 10),
 	}
 
-	// Encode
-	if _, err := Encode(&v); err == nil {
+	// Marshal
+	if _, err := Marshal(&v); err == nil {
 		t.Fatal("expected err")
 	}
 
-	// Decode
-	if err := Decode(&v, url.Values{"CV": []string{}}); err == nil {
+	// Unmarshal
+	if err := Unmarshal(&v, url.Values{"CV": []string{}}); err == nil {
 		t.Fatal("expected err")
 	}
 }
@@ -671,8 +671,8 @@ func TestMap(t *testing.T) {
 		},
 	}
 
-	// Encode
-	val, err := Encode(&v1)
+	// Marshal
+	val, err := Marshal(&v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -680,13 +680,13 @@ func TestMap(t *testing.T) {
 		t.Fatal("invalid encode result:", val, "expected:", exp)
 	}
 
-	// Decode
+	// Unmarshal
 	exp["3"] = []string{"ccc"}
 	exp["a"] = []string{"aaa"}
 	v1.M[3] = 0
 
 	v2 := TestType{}
-	err = Decode(&v2, exp)
+	err = Unmarshal(&v2, exp)
 	if err != nil {
 		t.Fatal(err)
 	}

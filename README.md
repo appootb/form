@@ -21,7 +21,7 @@ func MyHandler(w http.ResponseWriter, r *http.Request) {
     var person Person
 
     // r.PostForm is a map of our POST form values
-    err = form.Decode(&person, r.PostForm)
+    err = form.Unmarshal(&person, r.PostForm)
     if err != nil {
         // Handle error
     }
@@ -30,13 +30,13 @@ func MyHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Conversely, contents of a struct can be encoded into form values. Here's a variant of the previous example using the Encoder:
+Conversely, contents of a struct can be encoded into form values. Here's a variant of the previous example:
 
 ```go
 func MyHttpRequest() {
     person := Person{"Jane Doe", "555-5555"}
 
-    vals, err := form.Encode(&person)
+    vals, err := form.Marshal(&person)
 
     if err != nil {
         // Handle error

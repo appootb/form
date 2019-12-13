@@ -14,19 +14,23 @@ var (
 	marshalerType = reflect.TypeOf((*Marshaler)(nil)).Elem()
 )
 
-type Encoder struct{}
-
-func NewEncoder() *Encoder {
-	return &Encoder{}
+type Encoder struct {
+	values url.Values
 }
 
-func (e *Encoder) Encode(src interface{}, dst url.Values) error {
+func NewEncoder(dst url.Values) *Encoder {
+	return &Encoder{
+		values: dst,
+	}
+}
+
+func (e *Encoder) Encode(src interface{}) error {
 	v := reflect.ValueOf(src)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
 		return TypeError
 	}
 
-	err := e.encode(v.Elem(), dst)
+	err := e.encode(v.Elem(), e.values)
 	return err
 }
 

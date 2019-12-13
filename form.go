@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	TypeError = errors.New("the interface must be a struct")
+	TypeError = errors.New("the interface must be a pointer to a struct")
 )
 
-func Encode(src interface{}) (url.Values, error) {
+func Marshal(src interface{}) (url.Values, error) {
 	v := url.Values{}
-	err := NewEncoder().Encode(src, v)
+	err := NewEncoder(v).Encode(src)
 	return v, err
 }
 
-func Decode(dst interface{}, src url.Values) error {
-	return NewDecoder().Decode(dst, src)
+func Unmarshal(dst interface{}, src url.Values) error {
+	return NewDecoder(src).Decode(dst)
 }

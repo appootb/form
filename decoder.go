@@ -14,20 +14,24 @@ var (
 	unmarshalerType = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
 )
 
-type Decoder struct{}
-
-func NewDecoder() *Decoder {
-	return &Decoder{}
+type Decoder struct {
+	values url.Values
 }
 
-func (d *Decoder) Decode(dst interface{}, src url.Values) error {
+func NewDecoder(src url.Values) *Decoder {
+	return &Decoder{
+		values: src,
+	}
+}
+
+func (d *Decoder) Decode(dst interface{}) error {
 	v := reflect.ValueOf(dst)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
 		return TypeError
 	}
 
 	fields := map[string]bool{}
-	mapField, err := d.decode(v.Elem(), src, fields)
+	mapField, err := d.decode(v.Elem(), d.values, fields)
 	if err != nil {
 		return err
 	}
@@ -36,8 +40,8 @@ func (d *Decoder) Decode(dst interface{}, src url.Values) error {
 	}
 
 	t := mapField.Type()
-	m := reflect.MakeMapWithSize(reflect.MapOf(t.Key(), t.Elem()), len(src))
-	for k, vals := range src {
+	m := reflect.MakeMapWithSize(reflect.MapOf(t.Key(), t.Elem()), len(d.values))
+	for k, vals := range d.values {
 		if fields[k] {
 			continue
 		}
